@@ -65,12 +65,35 @@ function dayView(d){
 }
 function weekView(){return DAYS.map(d=>summary(d)).join('')}
 function groceries(){
- let map={};
- DAYS.forEach((d)=>PLAN[d].forEach(m=>m[1].forEach(x=>{map[x[0]]=(map[x[0]]||0)+1})));
- return `<section class="panel"><h2>Weekly Grocery List</h2><div class="muted">Tap items as you buy them.</div>${Object.entries(map).sort().map(([n,c],i)=>{
- let k='grocery:'+i, ch=localStorage.getItem(k)==='1';
- return `<label class="gitem ${ch?'checked':''}"><input type="checkbox" ${ch?'checked':''} onchange="localStorage.setItem('${k}',this.checked?'1':'0');render()"><span>${n}</span></label>`
- }).join('')}<div style="margin-top:12px"><button class="secondary" onclick="Object.keys(localStorage).filter(k=>k.startsWith('grocery:')).forEach(k=>localStorage.removeItem(k));render()">Reset grocery list</button></div></section>`
+ const items=[
+  ["Cream of Rice","14 servings / 630 g dry","Buy 2 boxes"],
+  ["Protein powder","13 scoops / 390 g","Current tub should cover it"],
+  ["Whole eggs","23 eggs","Buy 2 dozen"],
+  ["Liquid egg whites","24 Tbsp / 8 servings","Buy 1 carton"],
+  ["PB Fit","11 servings / 176 g","Buy 1 container"],
+  ["Oikos Triple Zero","8 cups","Buy 8 individual cups"],
+  ["Quaker Lower Sugar oatmeal","8 packets","Buy 8 packets"],
+  ["4-oz chicken breast packs","7 packs / 28 oz","Buy 2 four-packs"],
+  ["Canned chicken breast","48 oz total","Buy about 3 lb total"],
+  ["Beans","14 half-cup servings / 7 cups","Buy about 5 standard cans"],
+  ["Tuna pouches","5 pouches","Buy 5 pouches"],
+  ["Tuna cans","5 cans","Buy 5 cans"],
+  ["Daisy 2% Cottage Cheese","7 half-cup servings / 791 g (~28 oz)","Buy 2 tubs"],
+  ["Celery","7 servings","Buy about 2 bunches"]
+ ];
+ return `<section class="panel"><h2>Weekly Grocery List</h2>
+ <div class="muted">Amounts are based on the current 7-day meal plan. Tap items as you buy them.</div>
+ ${items.map((x,i)=>{
+   let k='grocery:'+i, ch=localStorage.getItem(k)==='1';
+   return `<label class="gitem ${ch?'checked':''}">
+   <input type="checkbox" ${ch?'checked':''} onchange="localStorage.setItem('${k}',this.checked?'1':'0');render()">
+   <span style="display:flex;flex-direction:column;gap:2px">
+     <strong>${x[0]}</strong>
+     <span class="muted">${x[1]}</span>
+     <span style="font-size:12px">${x[2]}</span>
+   </span></label>`
+ }).join('')}
+ <div style="margin-top:12px"><button class="secondary" onclick="Object.keys(localStorage).filter(k=>k.startsWith('grocery:')).forEach(k=>localStorage.removeItem(k));render()">Reset grocery list</button></div></section>`
 }
 function weight(){
  let log=JSON.parse(localStorage.getItem('weights')||'[]');
