@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827"><link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png"><title>Jeff's Meal Plan</title>
+<style>
+:root{--bg:#f4f6fa;--card:#fff;--ink:#111827;--muted:#6b7280;--line:#e5e7eb;--ok:#ecfdf5}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+header{position:sticky;top:0;z-index:9;background:rgba(244,246,250,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:12px}
+h1{font-size:20px;margin:0 0 10px}.tabs,.days{display:flex;gap:8px;overflow-x:auto}.tab,.daybtn{border:0;border-radius:999px;padding:9px 12px;font-weight:800;white-space:nowrap;background:#e5e7eb}.active{background:#111827!important;color:#fff}
+main{max-width:820px;margin:auto;padding:14px}.summary{background:#111827;color:white;border-radius:18px;padding:14px;margin-bottom:14px}.nums{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}.big{font-size:19px;font-weight:900}.small{font-size:11px;opacity:.78}
+.card{background:white;border-radius:18px;margin:12px 0;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}.card h2{font-size:17px;margin:0;padding:14px;border-bottom:1px solid #eee}
+.row{display:grid;grid-template-columns:28px 1fr 54px 48px 48px 44px 66px;gap:4px;align-items:center;padding:10px;border-bottom:1px solid #f0f0f0;font-size:12px}
+.head{font-size:10px;color:var(--muted);font-weight:800}.food{font-weight:700}.num{text-align:right}.portion{width:62px;padding:5px;border:1px solid #d1d5db;border-radius:8px;text-align:center}
+.checked{background:var(--ok);opacity:.7}.sub{padding:10px 12px;background:#fafafa;font-size:12px;font-weight:900}
+.panel{background:white;border-radius:18px;padding:14px;margin:12px 0}.panel h2{margin:0 0 12px;font-size:17px}
+input,button{font:inherit}.primary,.secondary{border:0;border-radius:12px;padding:11px 14px;font-weight:800}.primary{background:#111827;color:white}.secondary{background:#e5e7eb}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{display:flex;flex-direction:column;gap:5px}.field input{padding:10px;border:1px solid #d1d5db;border-radius:10px}
+.gitem{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #eee}.gitem input{width:20px;height:20px}.weightrow{display:flex;gap:8px}.weightrow input{flex:1;padding:10px;border:1px solid #d1d5db;border-radius:10px}
+.log{margin-top:12px}.log div{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee}.muted{color:var(--muted);font-size:12px}
+@media(max-width:500px){.row{grid-template-columns:26px 1fr 44px 40px 40px 36px 58px;font-size:11px}.portion{width:55px}.nums{grid-template-columns:repeat(2,1fr)}}
+</style></head>
+<body>
+<header><h1>Jeff's 2,000-Calorie Meal Plan</h1><div class="tabs" id="tabs"></div><div class="days" id="days" style="margin-top:8px"></div></header>
+<main id="app"></main>
+<script>
+const PLAN={"Monday": [["5:30 AM \u2014 Breakfast", [["Cream of Rice \u2014 1 serving", 150, 2, 35, 0], ["Protein powder \u2014 1 scoop", 120, 25, 2, 1], ["Whole eggs \u2014 2", 140, 12, 0, 10], ["PB Fit \u2014 1 serving", 70, 6, 7, 1.5]]], ["9:00 AM \u2014 Snack", [["Oikos Triple Zero", 90, 15, 7, 0], ["Quaker Lower Sugar oatmeal \u2014 1 packet", 120, 4, 24, 2]]], ["12:00 PM \u2014 Lunch", [["Chicken breast pack", 170, 30, 4, 4.5], ["Beans \u2014 1/2 cup", 130, 8, 23, 0.5], ["Celery \u2014 1 serving", 10, 0, 2, 0]]], ["3:15 PM \u2014 PRE-WORKOUT", [["Cream of Rice \u2014 2 servings", 300, 4, 70, 0], ["Protein powder \u2014 1 scoop", 120, 25, 2, 1]]], ["6:00 PM \u2014 POST-WORKOUT", [["Canned chicken \u2014 6 oz", 180, 38, 0, 3], ["Beans \u2014 1/2 cup", 120, 7, 20, 2], ["Tuna pouch", 70, 17, 0, 0.5], ["Bone broth", 50, 10, 2, 0], ["Whole egg \u2014 1", 70, 6, 0, 5], ["PB Fit \u2014 1 serving", 70, 6, 7, 1.5]]]], "Tuesday": [["5:30 AM \u2014 Breakfast", [["Lower Sugar oatmeal \u2014 1 packet", 120, 4, 24, 2], ["Protein powder \u2014 1 scoop", 120, 25, 2, 1], ["Whole eggs \u2014 3", 210, 18, 0, 15], ["Egg whites \u2014 6 Tbsp", 50, 10, 0, 0]]], ["9:00 AM \u2014 Snack", [["Oikos Triple Zero", 90, 15, 7, 0], ["PB Fit \u2014 1 serving", 70, 6, 7, 1.5]]], ["12:00 PM \u2014 Lunch", [["Canned chicken \u2014 6 oz", 180, 38, 0, 3], ["Beans \u2014 1/2 cup", 130, 8, 23, 0.5], ["Celery \u2014 1 serving", 10, 0, 2, 0], ["Bone broth", 50, 10, 2, 0]]], ["3:15 PM \u2014 PRE-WORKOUT", [["Cream of Rice \u2014 2 servings", 300, 4, 70, 0], ["Protein powder \u2014 1 scoop", 120, 25, 2, 1]]], ["6:00 PM \u2014 POST-WORKOUT", [["Chicken breast pack", 170, 30, 4, 4.5], ["Tuna pouch", 70, 17, 0, 0.5], ["Beans \u2014 1/2 cup", 120, 7, 20, 2], ["Whole egg \u2014 1", 70, 6, 0, 5], ["PB Fit \u2014 1 serving", 70, 6, 7, 1.5]]]], "Wednesday": [["5:30 AM \u2014 Breakfast", [["Cream of Rice \u2014 1 serving", 150, 2, 35, 0], ["Protein powder \u2014 1 scoop", 120, 25, 2, 1], ["Whole eggs \u2014 2", 140, 12, 0, 10], ["Oikos Triple Zero", 90, 15, 7, 0]]], ["9:00 AM \u2014 Snack", [["Lower Sugar oatmeal \u2014 1 packet", 120, 4, 24, 2], ["PB Fit \u2014 1 serving", 70, 6, 7, 1.5]]], ["12:00 PM \u2014 Lunch", [["Tuna can", 160, 20, 0, 9], ["Beans \u2014 1/2 cup", 130, 8, 23, 0.5], ["Celery \u2014 1 serving", 10, 0, 2, 0]]], ["3:15 PM \u2014 PRE-WORKOUT", [["Cream of Rice \u2014 2 servings", 300, 4, 70, 0], ["Protein powder \u2014 1 scoop", 120, 25, 2, 1]]], ["6:00 PM \u2014 POST-WORKOUT", [["Chicken breast pack", 170, 30, 4, 4.5], ["Canned chicken \u2014 6 oz", 180, 38, 0, 3], ["Beans \u2014 1/2 cup", 120, 7, 20, 2], ["Bone broth", 50, 10, 2, 0], ["Whole egg \u2014 1", 70, 6, 0, 5]]]], "Thursday": [["5:30 AM \u2014 Breakfast", [["Lower Sugar oatmeal \u2014 1 packet", 120, 4, 24, 2], ["Protein powder \u2014 1 scoop", 120, 25, 2, 1], ["Whole eggs \u2014 2", 140, 12, 0, 10], ["Egg whites \u2014 6 Tbsp", 50, 10, 0, 0]]], ["9:00 AM \u2014 Snack", [["Oikos Triple Zero", 90, 15, 7, 0], ["PB Fit \u2014 1 serving", 70, 6, 7, 1.5]]], ["12:00 PM \u2014 Lunch", [["Chicken breast pack", 170, 30, 4, 4.5], ["Beans \u2014 1/2 cup", 130, 8, 23, 0.5], ["Celery \u2014 1 serving", 10, 0, 2, 0], ["Bone broth", 50, 10, 2, 0]]], ["3:15 PM \u2014 PRE-WORKOUT", [["Cream of Rice \u2014 2 servings", 300, 4, 70, 0], ["Protein powder \u2014 1 scoop", 120, 25, 2, 1]]], ["6:00 PM \u2014 POST-WORKOUT", [["Tuna can", 160, 20, 0, 9], ["Canned chicken \u2014 6 oz", 180, 38, 0, 3], ["Beans \u2014 1/2 cup", 120, 7, 20, 2], ["Whole egg \u2014 1", 70, 6, 0, 5], ["PB Fit \u2014 1 serving", 70, 6, 7, 1.5]]]], "Friday": [["5:30 AM \u2014 Breakfast", [["Cream of Rice \u2014 1 serving", 150, 2, 35, 0], ["Protein powder \u2014 1 scoop", 120, 25, 2, 1], ["Whole eggs \u2014 3", 210, 18, 0, 15], ["PB Fit \u2014 1 serving", 70, 6, 7, 1.5]]], ["9:00 AM \u2014 Snack", [["Oikos Triple Zero", 90, 15, 7, 0], ["Lower Sugar oatmeal \u2014 1 packet", 120, 4, 24, 2]]], ["12:00 PM \u2014 Lunch", [["Tuna pouch", 70, 17, 0, 0.5], ["Canned chicken \u2014 6 oz", 180, 38, 0, 3], ["Beans \u2014 1/2 cup", 130, 8, 23, 0.5], ["Celery \u2014 1 serving", 10, 0, 2, 0]]], ["3:15 PM \u2014 PRE-WORKOUT", [["Cream of Rice \u2014 1 serving", 150, 2, 35, 0], ["Protein powder \u2014 1 scoop", 120, 25, 2, 1]]], ["6:00 PM \u2014 POST-WORKOUT", [["Chicken breast pack", 170, 30, 4, 4.5], ["Tuna can", 160, 20, 0, 9], ["Beans \u2014 1/2 cup", 120, 7, 20, 2], ["Bone broth", 50, 10, 2, 0], ["Whole egg \u2014 1", 70, 6, 0, 5]]]], "Saturday": [["5:30 AM \u2014 Breakfast", [["Lower Sugar oatmeal \u2014 1 packet", 120, 4, 24, 2], ["Protein powder \u2014 1 scoop", 120, 25, 2, 1], ["Whole eggs \u2014 2", 140, 12, 0, 10], ["PB Fit \u2014 1 serving", 70, 6, 7, 1.5]]], ["9:00 AM \u2014 Snack", [["Oikos Triple Zero", 90, 15, 7, 0], ["Egg whites \u2014 6 Tbsp", 50, 10, 0, 0]]], ["12:00 PM \u2014 Lunch", [["Chicken breast pack", 170, 30, 4, 4.5], ["Beans \u2014 1/2 cup", 130, 8, 23, 0.5], ["Tuna pouch", 70, 17, 0, 0.5], ["Celery \u2014 1 serving", 10, 0, 2, 0]]], ["3:15 PM \u2014 PRE-WORKOUT", [["Cream of Rice \u2014 2 servings", 300, 4, 70, 0], ["Protein powder \u2014 1 scoop", 120, 25, 2, 1]]], ["6:00 PM \u2014 POST-WORKOUT", [["Canned chicken \u2014 9 oz", 270, 57, 0, 4.5], ["Beans \u2014 1/2 cup", 120, 7, 20, 2], ["Tuna can", 160, 20, 0, 9], ["Bone broth", 50, 10, 2, 0]]]], "Sunday": [["5:30 AM \u2014 Breakfast", [["Lower Sugar oatmeal \u2014 1 packet", 120, 4, 24, 2], ["Protein powder \u2014 1 scoop", 120, 25, 2, 1], ["Whole eggs \u2014 2", 140, 12, 0, 10], ["PB Fit \u2014 1 serving", 70, 6, 7, 1.5]]], ["9:00 AM \u2014 Snack", [["Oikos Triple Zero", 90, 15, 7, 0], ["Egg whites \u2014 6 Tbsp", 50, 10, 0, 0]]], ["12:00 PM \u2014 Lunch", [["Tuna can", 160, 20, 0, 9], ["Beans \u2014 1/2 cup", 130, 8, 23, 0.5], ["Celery \u2014 1 serving", 10, 0, 2, 0], ["Bone broth", 50, 10, 2, 0]]], ["3:15 PM", [["Chicken breast pack", 170, 30, 4, 4.5], ["PB Fit \u2014 1 serving", 70, 6, 7, 1.5]]], ["6:00 PM \u2014 Dinner", [["Canned chicken \u2014 9 oz", 270, 57, 0, 4.5], ["Beans \u2014 1/2 cup", 120, 7, 20, 2], ["Whole eggs \u2014 2", 140, 12, 0, 10], ["Oikos Triple Zero", 90, 15, 7, 0], ["Lower Sugar oatmeal \u2014 1 packet", 120, 4, 24, 2], ["Tuna pouch", 70, 17, 0, 0.5]]]]};
+const DAYS=Object.keys(PLAN);
+let view=localStorage.getItem('view')||'Today';
+let day=localStorage.getItem('day')||DAYS[(new Date().getDay()+6)%7];
+const fmt=n=>Math.round(n*10)/10;
+const itemKey=(d,m,i,s)=>`${s}:${d}:${m}:${i}`;
+function tabs(){document.getElementById('tabs').innerHTML=['Today','Week','Grocery','Weight'].map(v=>`<button class="tab ${view===v?'active':''}" onclick="view='${v}';localStorage.setItem('view',view);render()">${v}</button>`).join('');
+document.getElementById('days').style.display=(view==='Today'||view==='Week')?'flex':'none';
+document.getElementById('days').innerHTML=DAYS.map(d=>`<button class="daybtn ${day===d?'active':''}" onclick="day='${d}';localStorage.setItem('day',day);render()">${d.slice(0,3)}</button>`).join('')}
+function totals(d){
+ let t={cal:0,p:0,c:0,f:0};
+ PLAN[d].forEach((m,mi)=>m[1].forEach((x,ii)=>{
+  let mult=parseFloat(localStorage.getItem(itemKey(d,mi,ii,'portion'))||'1');
+  t.cal+=x[1]*mult;t.p+=x[2]*mult;t.c+=x[3]*mult;t.f+=x[4]*mult;
+ }));return t
+}
+function summary(d){let t=totals(d);return `<div class="summary"><div style="font-weight:900;margin-bottom:10px">${d}</div><div class="nums">
+<div><div class="big">${fmt(t.cal)}</div><div class="small">Calories</div></div><div><div class="big">${fmt(t.p)}g</div><div class="small">Protein</div></div>
+<div><div class="big">${fmt(t.c)}g</div><div class="small">Carbs</div></div><div><div class="big">${fmt(t.f)}g</div><div class="small">Fat</div></div></div></div>`}
+function dayView(d){
+ let out=summary(d);
+ PLAN[d].forEach((m,mi)=>{
+  let st={cal:0,p:0,c:0,f:0};
+  let rows=m[1].map((x,ii)=>{
+   let mult=parseFloat(localStorage.getItem(itemKey(d,mi,ii,'portion'))||'1');
+   let chk=localStorage.getItem(itemKey(d,mi,ii,'check'))==='1';
+   st.cal+=x[1]*mult;st.p+=x[2]*mult;st.c+=x[3]*mult;st.f+=x[4]*mult;
+   return `<div class="row ${chk?'checked':''}">
+   <input type="checkbox" ${chk?'checked':''} onchange="localStorage.setItem('${itemKey(d,mi,ii,'check')}',this.checked?'1':'0');render()">
+   <div class="food">${x[0]}</div><div class="num">${fmt(x[1]*mult)}</div><div class="num">${fmt(x[2]*mult)}</div><div class="num">${fmt(x[3]*mult)}</div><div class="num">${fmt(x[4]*mult)}</div>
+   <input class="portion" type="number" min=".25" max="4" step=".25" value="${mult}" onchange="localStorage.setItem('${itemKey(d,mi,ii,'portion')}',this.value||1);render()"></div>`;
+  }).join('');
+  out+=`<section class="card"><h2>${m[0]}</h2><div class="row head"><div></div><div>Food</div><div class="num">Cal</div><div class="num">P</div><div class="num">C</div><div class="num">F</div><div class="num">Portion</div></div>${rows}
+  <div class="sub">Meal total: ${fmt(st.cal)} cal • ${fmt(st.p)}g P • ${fmt(st.c)}g C • ${fmt(st.f)}g F</div></section>`;
+ });
+ out+=`<div class="grid2"><button class="secondary" onclick="resetDay('${d}')">Reset day</button><button class="primary" onclick="window.print()">Print</button></div>`;
+ return out
+}
+function weekView(){return DAYS.map(d=>summary(d)).join('')}
+function groceries(){
+ let map={};
+ DAYS.forEach((d)=>PLAN[d].forEach(m=>m[1].forEach(x=>{map[x[0]]=(map[x[0]]||0)+1})));
+ return `<section class="panel"><h2>Weekly Grocery List</h2><div class="muted">Tap items as you buy them.</div>${Object.entries(map).sort().map(([n,c],i)=>{
+ let k='grocery:'+i, ch=localStorage.getItem(k)==='1';
+ return `<label class="gitem ${ch?'checked':''}"><input type="checkbox" ${ch?'checked':''} onchange="localStorage.setItem('${k}',this.checked?'1':'0');render()"><span>${n}</span></label>`
+ }).join('')}<div style="margin-top:12px"><button class="secondary" onclick="Object.keys(localStorage).filter(k=>k.startsWith('grocery:')).forEach(k=>localStorage.removeItem(k));render()">Reset grocery list</button></div></section>`
+}
+function weight(){
+ let log=JSON.parse(localStorage.getItem('weights')||'[]');
+ return `<section class="panel"><h2>Weight Tracker</h2><div class="weightrow"><input id="wt" type="number" step=".1" placeholder="Weight (lb)"><button class="primary" onclick="addWeight()">Add</button></div>
+ <div class="log">${log.slice().reverse().map(x=>`<div><span>${x.date}</span><strong>${x.wt} lb</strong></div>`).join('')||'<p class="muted">No entries yet.</p>'}</div></section>`
+}
+function addWeight(){let v=document.getElementById('wt').value;if(!v)return;let l=JSON.parse(localStorage.getItem('weights')||'[]');l.push({date:new Date().toLocaleDateString(),wt:parseFloat(v)});localStorage.setItem('weights',JSON.stringify(l));render()}
+function resetDay(d){PLAN[d].forEach((m,mi)=>m[1].forEach((x,ii)=>{localStorage.removeItem(itemKey(d,mi,ii,'check'));localStorage.removeItem(itemKey(d,mi,ii,'portion'))}));render()}
+function render(){tabs();document.getElementById('app').innerHTML=view==='Today'?dayView(day):view==='Week'?weekView():view==='Grocery'?groceries():weight()}
+render(); if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script></body></html>
